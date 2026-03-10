@@ -17,4 +17,45 @@ model Product {
 
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
+
+ orderItems OrderItem[]
+ movements  StockMovement[]
+}
+
+model Order {
+ id        String   @id @default(cuid())
+ total     Float
+ createdAt DateTime @default(now())
+
+ items OrderItem[]
+}
+
+model OrderItem {
+ id        String @id @default(cuid())
+
+ orderId   String
+ productId String
+
+ quantity  Int
+ price     Float
+
+ order   Order   @relation(fields: [orderId], references: [id])
+ product Product @relation(fields: [productId], references: [id])
+}
+
+model StockMovement {
+ id        String   @id @default(cuid())
+ productId String
+ type      MovementType
+ quantity  Int
+
+ createdAt DateTime @default(now())
+
+ product Product @relation(fields: [productId], references: [id])
+}
+
+enum MovementType {
+ SALE
+ RESTOCK
+ ADJUSTMENT
 }
