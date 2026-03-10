@@ -52,12 +52,12 @@ export class OrdersService {
         });
       }
 
-      await tx.order.update({
+      const updatedOrder = await tx.order.update({
         where: { id: createdOrder.id },
         data: { total },
       });
 
-      return createdOrder;
+      return updatedOrder;
     });
 
     return order;
