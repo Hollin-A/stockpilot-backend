@@ -40,4 +40,14 @@ export class AnalyticsService {
       },
     });
   }
+
+  async getStockMovements(productId?: string) {
+    return this.prisma.stockMovement.findMany({
+      where: productId ? { productId } : {},
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+    });
+  }
 }
