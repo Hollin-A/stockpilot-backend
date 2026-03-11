@@ -15,4 +15,19 @@ export class AnalyticsService {
       totalRevenue: revenue,
     };
   }
+
+  async getTopProducts() {
+    return this.prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: {
+        quantity: true,
+      },
+      orderBy: {
+        _sum: {
+          quantity: 'desc',
+        },
+      },
+      take: 5,
+    });
+  }
 }
