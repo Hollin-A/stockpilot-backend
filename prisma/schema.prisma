@@ -18,8 +18,12 @@ model Product {
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
 
+ supplierId String?
+
  orderItems OrderItem[]
  movements  StockMovement[]
+ purchaseOrderItems PurchaseOrderItem[]
+ supplier Supplier? @relation(fields: [supplierId], references: [id])
 }
 
 model Order {
