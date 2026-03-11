@@ -30,4 +30,14 @@ export class AnalyticsService {
       take: 5,
     });
   }
+
+  async getLowStockProducts() {
+    return this.prisma.product.findMany({
+      where: {
+        stock: {
+          lte: this.prisma.product.fields.threshold,
+        },
+      },
+    });
+  }
 }
