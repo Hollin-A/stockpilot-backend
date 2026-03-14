@@ -6,35 +6,42 @@ export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
 
   async getSalesSummary() {
-    const orders = await this.prisma.order.findMany();
-
-    const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const result = await this.prisma.order.aggregate({
+      _count: { id: true },
+      _sum: { total: true },
+    });
 
     return {
-      totalOrders: orders.length,
-      totalRevenue: revenue,
+      totalOrders: result._count.id,
+      totalRevenue: result._sum.total ?? 0,
     };
   }
 
   async getTopProducts() {
-    return this.prisma.orderItem.groupBy({
+    const grouped = await this.prisma.orderItem.groupBy({
       by: ['productId'],
-      _sum: {
-        quantity: true,
-      },
-      orderBy: {
-        _sum: {
-          quantity: 'desc',
-        },
-      },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
       take: 5,
     });
+
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: grouped.map((g) => g.productId) } },
+      select: { id: true, name: true, sku: true },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    return grouped.map((g) => ({
+      ...productMap.get(g.productId),
+      totalQuantitySold: g._sum.quantity,
+    }));
   }
 
   async getLowStockProducts() {
-    return this.prisma.$queryRaw`
-      SELECT * FROM "Product" WHERE stock <= threshold
-    `;
+    return this.prisma.product.findMany({
+      where: { stock: { lte: this.prisma.product.fields.threshold } },
+    });
   }
 
   async getStockMovements(productId?: string) {
