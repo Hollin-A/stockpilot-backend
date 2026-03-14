@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -10,7 +11,7 @@ export class ProductsService {
     return this.prisma.product.findMany();
   }
 
-  async create(data: any) {
+  async create(data: CreateProductDto) {
     try {
       return await this.prisma.product.create({ data });
     } catch (e) {

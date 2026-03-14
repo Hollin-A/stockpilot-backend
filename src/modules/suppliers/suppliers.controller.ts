@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
 
 @Controller('suppliers')
 export class SuppliersController {
@@ -8,8 +9,8 @@ export class SuppliersController {
 
   @Roles('ADMIN')
   @Post()
-  create(@Body() body: any) {
-    return this.suppliersService.create(body);
+  create(@Body() dto: CreateSupplierDto) {
+    return this.suppliersService.create(dto);
   }
 
   @Get()

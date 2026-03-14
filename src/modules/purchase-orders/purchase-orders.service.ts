@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { MovementType } from '@prisma/client';
+import { CreatePurchaseOrderDto } from './dto/create-purchase-order.dto';
 
 @Injectable()
 export class PurchaseOrdersService {
   constructor(private prisma: PrismaService) {}
 
-  async createPurchaseOrder(data: any) {
+  async createPurchaseOrder(data: CreatePurchaseOrderDto) {
     return this.prisma.purchaseOrder.create({
       data: {
         supplierId: data.supplierId,
