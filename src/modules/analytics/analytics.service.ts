@@ -32,13 +32,9 @@ export class AnalyticsService {
   }
 
   async getLowStockProducts() {
-    return this.prisma.product.findMany({
-      where: {
-        stock: {
-          lte: this.prisma.product.fields.threshold,
-        },
-      },
-    });
+    return this.prisma.$queryRaw`
+      SELECT * FROM "Product" WHERE stock <= threshold
+    `;
   }
 
   async getStockMovements(productId?: string) {
