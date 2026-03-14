@@ -1,14 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { MovementType } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async createOrder(dto: CreateOrderDto) {
     let total = 0;
+    this.logger.log(`Creating order with ${dto.items.length} item(s)`);
 
     const order = await this.prisma.$transaction(async (tx) => {
       const createdOrder = await tx.order.create({
@@ -21,10 +24,12 @@ export class OrdersService {
         });
 
         if (!product) {
+          this.logger.warn(`Order failed: product not found: ${item.productId}`);
           throw new NotFoundException('Product not found');
         }
 
         if (product.stock < item.quantity) {
+          this.logger.warn(`Order failed: insufficient stock for product: ${product.id} (requested: ${item.quantity}, available: ${product.stock})`);
           throw new BadRequestException(`Insufficient stock for product: ${product.id}`);
         }
 
@@ -64,6 +69,7 @@ export class OrdersService {
       return updatedOrder;
     });
 
+    this.logger.log(`Order created: ${order.id} (total: ${order.total})`);
     return order;
   }
 }
