@@ -97,3 +97,17 @@ model PurchaseOrderItem {
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 }
+
+model User {
+  id        String @id @default(cuid())
+  email     String @unique
+  password  String
+  role      Role
+
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
