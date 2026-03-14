@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -8,7 +9,8 @@ export class UsersService {
 
   async create(data: any) {
     try {
-      return await this.prisma.user.create({ data });
+      const hashed = await bcrypt.hash(data.password, 10);
+      return await this.prisma.user.create({ data: { ...data, password: hashed } });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
         throw new ConflictException('A user with this email already exists');
