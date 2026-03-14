@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { MovementType } from '@prisma/client';
@@ -21,7 +21,7 @@ export class OrdersService {
         });
 
         if (!product) {
-          throw new Error('Product not found');
+          throw new NotFoundException('Product not found');
         }
 
         const price = product.price;

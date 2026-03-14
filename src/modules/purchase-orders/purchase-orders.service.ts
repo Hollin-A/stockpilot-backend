@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { MovementType } from '@prisma/client';
 
@@ -29,7 +29,7 @@ export class PurchaseOrdersService {
       });
 
       if (!order) {
-        throw new Error('Purchase order not found');
+        throw new NotFoundException('Purchase order not found');
       }
 
       for (const item of order.items) {
@@ -38,7 +38,7 @@ export class PurchaseOrdersService {
         });
 
         if (!product) {
-          throw new Error(`Product not found: ${item.productId}`);
+          throw new NotFoundException(`Product not found: ${item.productId}`);
         }
 
         await tx.product.update({
