@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { MovementType } from '@prisma/client';
@@ -24,13 +29,19 @@ export class OrdersService {
         });
 
         if (!product) {
-          this.logger.warn(`Order failed: product not found: ${item.productId}`);
+          this.logger.warn(
+            `Order failed: product not found: ${item.productId}`,
+          );
           throw new NotFoundException('Product not found');
         }
 
         if (product.stock < item.quantity) {
-          this.logger.warn(`Order failed: insufficient stock for product: ${product.id} (requested: ${item.quantity}, available: ${product.stock})`);
-          throw new BadRequestException(`Insufficient stock for product: ${product.id}`);
+          this.logger.warn(
+            `Order failed: insufficient stock for product: ${product.id} (requested: ${item.quantity}, available: ${product.stock})`,
+          );
+          throw new BadRequestException(
+            `Insufficient stock for product: ${product.id}`,
+          );
         }
 
         const price = product.price;

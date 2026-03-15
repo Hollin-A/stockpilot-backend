@@ -14,7 +14,16 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
-  imports: [PrismaModule, ProductsModule, OrdersModule, SuppliersModule, PurchaseOrdersModule, AnalyticsModule, AuthModule, UsersModule],
+  imports: [
+    PrismaModule,
+    ProductsModule,
+    OrdersModule,
+    SuppliersModule,
+    PurchaseOrdersModule,
+    AnalyticsModule,
+    AuthModule,
+    UsersModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

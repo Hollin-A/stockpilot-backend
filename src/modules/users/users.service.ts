@@ -23,7 +23,10 @@ export class UsersService {
       this.logger.log(`User created: ${user.email} (${user.role})`);
       return user;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
         this.logger.warn(`Attempted to create duplicate user: ${data.email}`);
         throw new ConflictException('A user with this email already exists');
       }

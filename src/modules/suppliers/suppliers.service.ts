@@ -12,12 +12,21 @@ export class SuppliersService {
   async create(data: CreateSupplierDto) {
     try {
       const supplier = await this.prisma.supplier.create({ data });
-      this.logger.log(`Supplier created: ${supplier.name} (id: ${supplier.id})`);
+      this.logger.log(
+        `Supplier created: ${supplier.name} (id: ${supplier.id})`,
+      );
       return supplier;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        this.logger.warn(`Attempted to create duplicate supplier: ${data.name}`);
-        throw new ConflictException('A supplier with these details already exists');
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        this.logger.warn(
+          `Attempted to create duplicate supplier: ${data.name}`,
+        );
+        throw new ConflictException(
+          'A supplier with these details already exists',
+        );
       }
       throw e;
     }

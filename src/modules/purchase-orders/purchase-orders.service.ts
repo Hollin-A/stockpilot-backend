@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { MovementType } from '@prisma/client';
 import { CreatePurchaseOrderDto } from './dto/create-purchase-order.dto';
@@ -10,9 +15,13 @@ export class PurchaseOrdersService {
   constructor(private prisma: PrismaService) {}
 
   async createPurchaseOrder(data: CreatePurchaseOrderDto) {
-    const supplier = await this.prisma.supplier.findUnique({ where: { id: data.supplierId } });
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { id: data.supplierId },
+    });
     if (!supplier) {
-      this.logger.warn(`Purchase order creation failed: supplier not found: ${data.supplierId}`);
+      this.logger.warn(
+        `Purchase order creation failed: supplier not found: ${data.supplierId}`,
+      );
       throw new NotFoundException('Supplier not found');
     }
 
@@ -28,7 +37,9 @@ export class PurchaseOrdersService {
         items: true,
       },
     });
-    this.logger.log(`Purchase order created: ${order.id} for supplier: ${data.supplierId} with ${data.items.length} item(s)`);
+    this.logger.log(
+      `Purchase order created: ${order.id} for supplier: ${data.supplierId} with ${data.items.length} item(s)`,
+    );
     return order;
   }
 
@@ -46,8 +57,12 @@ export class PurchaseOrdersService {
       }
 
       if (order.status === 'RECEIVED') {
-        this.logger.warn(`Receive failed: purchase order already received: ${id}`);
-        throw new BadRequestException('Purchase order has already been received');
+        this.logger.warn(
+          `Receive failed: purchase order already received: ${id}`,
+        );
+        throw new BadRequestException(
+          'Purchase order has already been received',
+        );
       }
 
       for (const item of order.items) {
