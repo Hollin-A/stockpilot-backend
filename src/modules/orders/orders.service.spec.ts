@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../../database/prisma/prisma.service';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 const mockPrismaService = {
   $transaction: jest.fn(),
-  order: { create: jest.fn(), update: jest.fn() },
-  orderItem: { create: jest.fn() },
-  product: { findUnique: jest.fn(), update: jest.fn() },
-  stockMovement: { create: jest.fn() },
 };
 
 describe('OrdersService', () => {
@@ -27,5 +25,42 @@ describe('OrdersService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('createOrder', () => {
+    const dto: CreateOrderDto = { items: [{ productId: 'prod-1', quantity: 2 }] };
+
+    it('should create and return an order', async () => {
+      const order = { id: 'order-1', total: 19.98 };
+      mockPrismaService.$transaction.mockResolvedValue(order);
+      expect(await service.createOrder(dto)).toEqual(order);
+      expect(mockPrismaService.$transaction).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if product is not found', async () => {
+      mockPrismaService.$transaction.mockImplementation(async (fn) => {
+        const tx = {
+          order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
+          product: { findUnique: jest.fn().mockResolvedValue(null) },
+          orderItem: { create: jest.fn() },
+          stockMovement: { create: jest.fn() },
+        };
+        return fn(tx);
+      });
+      await expect(service.createOrder(dto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException if stock is insufficient', async () => {
+      mockPrismaService.$transaction.mockImplementation(async (fn) => {
+        const tx = {
+          order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
+          product: { findUnique: jest.fn().mockResolvedValue({ id: 'prod-1', stock: 1, price: 9.99 }) },
+          orderItem: { create: jest.fn() },
+          stockMovement: { create: jest.fn() },
+        };
+        return fn(tx);
+      });
+      await expect(service.createOrder(dto)).rejects.toThrow(BadRequestException);
+    });
   });
 });
