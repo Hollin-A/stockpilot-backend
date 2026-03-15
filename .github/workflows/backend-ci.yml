@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-      - feature/*
+      - 'feature/*'
+      - 'feat/*'
+      - 'fix/*'
   pull_request:
     branches:
       - main
@@ -15,18 +17,28 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
         run: npm install
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Build project
         run: npm run build
 
-      # - name: Run linter
-      #   run: npm run lint
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+        env:
+          JWT_SECRET: ci-test-secret

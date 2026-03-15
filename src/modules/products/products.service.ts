@@ -19,8 +19,13 @@ export class ProductsService {
       this.logger.log(`Product created: ${product.name} (SKU: ${product.sku})`);
       return product;
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        this.logger.warn(`Attempted to create duplicate product SKU: ${data.sku}`);
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        this.logger.warn(
+          `Attempted to create duplicate product SKU: ${data.sku}`,
+        );
         throw new ConflictException('A product with this SKU already exists');
       }
       throw e;

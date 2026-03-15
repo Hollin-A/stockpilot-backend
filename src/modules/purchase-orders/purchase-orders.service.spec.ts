@@ -7,7 +7,11 @@ import { CreatePurchaseOrderDto } from './dto/create-purchase-order.dto';
 const mockPrismaService = {
   $transaction: jest.fn(),
   supplier: { findUnique: jest.fn() },
-  purchaseOrder: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+  purchaseOrder: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
+  },
   product: { findUnique: jest.fn(), update: jest.fn() },
   stockMovement: { create: jest.fn() },
 };
@@ -32,18 +36,31 @@ describe('PurchaseOrdersService', () => {
   });
 
   describe('createPurchaseOrder', () => {
-    const dto: CreatePurchaseOrderDto = { supplierId: 'sup-1', items: [{ productId: 'prod-1', quantity: 10 }] };
+    const dto: CreatePurchaseOrderDto = {
+      supplierId: 'sup-1',
+      items: [{ productId: 'prod-1', quantity: 10 }],
+    };
 
     it('should create and return a purchase order', async () => {
-      const order = { id: 'po-1', supplierId: 'sup-1', status: 'PENDING', items: [] };
-      mockPrismaService.supplier.findUnique.mockResolvedValue({ id: 'sup-1', name: 'Acme' });
+      const order = {
+        id: 'po-1',
+        supplierId: 'sup-1',
+        status: 'PENDING',
+        items: [],
+      };
+      mockPrismaService.supplier.findUnique.mockResolvedValue({
+        id: 'sup-1',
+        name: 'Acme',
+      });
       mockPrismaService.purchaseOrder.create.mockResolvedValue(order);
       expect(await service.createPurchaseOrder(dto)).toEqual(order);
     });
 
     it('should throw NotFoundException if supplier does not exist', async () => {
       mockPrismaService.supplier.findUnique.mockResolvedValue(null);
-      await expect(service.createPurchaseOrder(dto)).rejects.toThrow(NotFoundException);
+      await expect(service.createPurchaseOrder(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -55,23 +72,37 @@ describe('PurchaseOrdersService', () => {
     });
 
     it('should throw NotFoundException if purchase order does not exist', async () => {
-      mockPrismaService.$transaction.mockImplementation(async (fn) => {
-        const tx = { purchaseOrder: { findUnique: jest.fn().mockResolvedValue(null) } };
-        return fn(tx);
-      });
-      await expect(service.receivePurchaseOrder('missing-id')).rejects.toThrow(NotFoundException);
+      mockPrismaService.$transaction.mockImplementation(
+        (fn: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            purchaseOrder: { findUnique: jest.fn().mockResolvedValue(null) },
+          };
+          return fn(tx);
+        },
+      );
+      await expect(service.receivePurchaseOrder('missing-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException if purchase order is already received', async () => {
-      mockPrismaService.$transaction.mockImplementation(async (fn) => {
-        const tx = {
-          purchaseOrder: {
-            findUnique: jest.fn().mockResolvedValue({ id: 'po-1', status: 'RECEIVED', items: [] }),
-          },
-        };
-        return fn(tx);
-      });
-      await expect(service.receivePurchaseOrder('po-1')).rejects.toThrow(BadRequestException);
+      mockPrismaService.$transaction.mockImplementation(
+        (fn: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            purchaseOrder: {
+              findUnique: jest.fn().mockResolvedValue({
+                id: 'po-1',
+                status: 'RECEIVED',
+                items: [],
+              }),
+            },
+          };
+          return fn(tx);
+        },
+      );
+      await expect(service.receivePurchaseOrder('po-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

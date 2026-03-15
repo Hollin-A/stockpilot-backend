@@ -28,7 +28,9 @@ describe('OrdersService', () => {
   });
 
   describe('createOrder', () => {
-    const dto: CreateOrderDto = { items: [{ productId: 'prod-1', quantity: 2 }] };
+    const dto: CreateOrderDto = {
+      items: [{ productId: 'prod-1', quantity: 2 }],
+    };
 
     it('should create and return an order', async () => {
       const order = { id: 'order-1', total: 19.98 };
@@ -38,29 +40,39 @@ describe('OrdersService', () => {
     });
 
     it('should throw NotFoundException if product is not found', async () => {
-      mockPrismaService.$transaction.mockImplementation(async (fn) => {
-        const tx = {
-          order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
-          product: { findUnique: jest.fn().mockResolvedValue(null) },
-          orderItem: { create: jest.fn() },
-          stockMovement: { create: jest.fn() },
-        };
-        return fn(tx);
-      });
+      mockPrismaService.$transaction.mockImplementation(
+        (fn: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
+            product: { findUnique: jest.fn().mockResolvedValue(null) },
+            orderItem: { create: jest.fn() },
+            stockMovement: { create: jest.fn() },
+          };
+          return fn(tx);
+        },
+      );
       await expect(service.createOrder(dto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if stock is insufficient', async () => {
-      mockPrismaService.$transaction.mockImplementation(async (fn) => {
-        const tx = {
-          order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
-          product: { findUnique: jest.fn().mockResolvedValue({ id: 'prod-1', stock: 1, price: 9.99 }) },
-          orderItem: { create: jest.fn() },
-          stockMovement: { create: jest.fn() },
-        };
-        return fn(tx);
-      });
-      await expect(service.createOrder(dto)).rejects.toThrow(BadRequestException);
+      mockPrismaService.$transaction.mockImplementation(
+        (fn: (tx: unknown) => Promise<unknown>) => {
+          const tx = {
+            order: { create: jest.fn().mockResolvedValue({ id: 'order-1' }) },
+            product: {
+              findUnique: jest
+                .fn()
+                .mockResolvedValue({ id: 'prod-1', stock: 1, price: 9.99 }),
+            },
+            orderItem: { create: jest.fn() },
+            stockMovement: { create: jest.fn() },
+          };
+          return fn(tx);
+        },
+      );
+      await expect(service.createOrder(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

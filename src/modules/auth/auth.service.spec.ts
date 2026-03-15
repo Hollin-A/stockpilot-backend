@@ -33,23 +33,40 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should throw UnauthorizedException if user is not found', async () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
-      await expect(service.login('unknown@example.com', 'password')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login('unknown@example.com', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
-      mockUsersService.findByEmail.mockResolvedValue({ id: '1', email: 'user@example.com', password: 'hashed', role: 'STAFF' });
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: '1',
+        email: 'user@example.com',
+        password: 'hashed',
+        role: 'STAFF',
+      });
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-      await expect(service.login('user@example.com', 'wrongpassword')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login('user@example.com', 'wrongpassword'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return an access token on successful login', async () => {
-      mockUsersService.findByEmail.mockResolvedValue({ id: '1', email: 'user@example.com', password: 'hashed', role: 'STAFF' });
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: '1',
+        email: 'user@example.com',
+        password: 'hashed',
+        role: 'STAFF',
+      });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       mockJwtService.sign.mockReturnValue('signed-token');
 
       const result = await service.login('user@example.com', 'correctpassword');
       expect(result).toEqual({ access_token: 'signed-token' });
-      expect(mockJwtService.sign).toHaveBeenCalledWith({ sub: '1', role: 'STAFF' });
+      expect(mockJwtService.sign).toHaveBeenCalledWith({
+        sub: '1',
+        role: 'STAFF',
+      });
     });
   });
 });
