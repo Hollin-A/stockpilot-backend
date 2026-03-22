@@ -2,7 +2,7 @@
 
 Inventory and POS management backend built with NestJS, Prisma, and PostgreSQL.
 
-This API powers the StockPilot retail dashboard, handling product management, sales orders, inventory tracking, supplier management, and analytics.
+This API powers the [StockPilot](https://stockpilot-lk.vercel.app) retail dashboard, handling product management, sales orders, inventory tracking, supplier management, and analytics.
 
 ---
 
@@ -48,16 +48,15 @@ src/
 ## Features
 
 - Product management with SKU tracking
-- Order processing (POS) with stock decrement
-- Inventory tracking with stock movements
+- Order processing (POS) with automatic stock decrement
+- Inventory tracking with stock movements (sale, restock, adjustment)
 - Supplier management
 - Purchase orders and restocking workflow
-- Sales analytics and low stock alerts
+- Sales analytics (revenue over time, top products, low stock alerts)
 - JWT authentication with role-based authorization (`ADMIN`, `STAFF`)
 - Global validation pipeline with typed DTOs
-- Structured logging across all services
 - Consistent error responses via global exception filter
-- Swagger API documentation at `/api`
+- Swagger API documentation
 
 ---
 
@@ -103,38 +102,55 @@ src/
 | GET | `/analytics/top-products` | Authenticated |
 | GET | `/analytics/low-stock` | Authenticated |
 | GET | `/analytics/stock-movements` | Authenticated |
+| GET | `/analytics/sales-over-time` | Authenticated |
 
 ---
 
-## Running the Project
+## Getting Started
 
-**1. Install dependencies**
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL database (or a [Neon](https://neon.tech) instance)
+
+### 1. Install dependencies
+
 ```bash
 npm install
 ```
 
-**2. Set environment variables**
+### 2. Set environment variables
 
 Create a `.env` file in the root:
+
 ```env
 DATABASE_URL=your_postgresql_connection_string
 JWT_SECRET=your_jwt_secret
+PORT=4000
 ```
 
-**3. Generate Prisma client and run migrations**
+### 3. Generate Prisma client and run migrations
+
 ```bash
 npx prisma generate
 npx prisma migrate dev
 ```
 
-**4. Start the development server**
+### 4. Seed the database (optional)
+
+```bash
+npx prisma db seed
+```
+
+### 5. Start the development server
+
 ```bash
 npm run start:dev
 ```
 
-**5. Open Swagger docs**
+### 6. Open Swagger docs
 
-http://localhost:3000/api
+Visit [http://localhost:4000/api](http://localhost:4000/api) to explore the API.
 
 ---
 
@@ -152,9 +168,9 @@ npm run test:cov
 
 ## CI/CD
 
-GitHub Actions runs automatically on pushes to `main`, `feat/*`, `fix/*`, and `feature/*` branches.
+GitHub Actions runs on pushes to `main`, `feat/*`, `fix/*`, and `feature/*` branches, and on pull requests to `main`.
 
-The pipeline runs the following steps in order:
+Pipeline steps:
 
 1. Install dependencies
 2. Generate Prisma client
@@ -175,4 +191,4 @@ The pipeline runs the following steps in order:
 
 ## Author
 
-Built as part of a portfolio project demonstrating modern backend architecture with NestJS.
+Built as a portfolio project demonstrating modern backend architecture with NestJS.
