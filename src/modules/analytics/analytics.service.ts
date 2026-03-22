@@ -53,4 +53,60 @@ export class AnalyticsService {
       take: 50,
     });
   }
+
+  async getSalesOverTime(startDate?: string, endDate?: string) {
+    const start = startDate
+      ? new Date(startDate)
+      : (
+          await this.prisma.order.findFirst({
+            orderBy: { createdAt: 'asc' },
+            select: { createdAt: true },
+          })
+        )?.createdAt;
+
+    const end = endDate
+      ? new Date(endDate)
+      : (
+          await this.prisma.order.findFirst({
+            orderBy: { createdAt: 'desc' },
+            select: { createdAt: true },
+          })
+        )?.createdAt;
+
+    if (!start || !end) return [];
+
+    const conditions: string[] = [];
+    const params: unknown[] = [start, end];
+    conditions.push(`"createdAt" >= $1`, `"createdAt" <= $2`);
+
+    const rows = await this.prisma.$queryRawUnsafe<
+      { date: string; revenue: number }[]
+    >(
+      `SELECT "createdAt"::date::text AS date,
+              COALESCE(SUM(total), 0) AS revenue
+       FROM "Order"
+       WHERE ${conditions.join(' AND ')}
+       GROUP BY "createdAt"::date
+       ORDER BY date ASC`,
+      ...params,
+    );
+
+    const revenueMap = new Map(
+      rows.map((r) => [r.date, Number(r.revenue)]),
+    );
+
+    const result: { date: string; revenue: number }[] = [];
+    const cursor = new Date(start);
+    cursor.setUTCHours(0, 0, 0, 0);
+    const endDate_ = new Date(end);
+    endDate_.setUTCHours(0, 0, 0, 0);
+
+    while (cursor <= endDate_) {
+      const key = cursor.toISOString().slice(0, 10);
+      result.push({ date: key, revenue: revenueMap.get(key) ?? 0 });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    return result;
+  }
 }

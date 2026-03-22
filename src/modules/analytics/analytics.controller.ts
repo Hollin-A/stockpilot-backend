@@ -24,4 +24,12 @@ export class AnalyticsController {
   getStockMovements(@Query('productId') productId?: string) {
     return this.analyticsService.getStockMovements(productId);
   }
+
+  @Get('sales-over-time')
+  getSalesOverTime(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.analyticsService.getSalesOverTime(startDate, endDate);
+  }
 }
