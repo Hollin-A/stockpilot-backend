@@ -74,7 +74,7 @@ export class OrdersService {
 
       const updatedOrder = await tx.order.update({
         where: { id: createdOrder.id },
-        data: { total },
+        data: { total: Math.round(total * 100) / 100 },
       });
 
       return updatedOrder;

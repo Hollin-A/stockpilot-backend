@@ -13,7 +13,7 @@ export class AnalyticsService {
 
     return {
       totalOrders: result._count.id,
-      totalRevenue: result._sum.total ?? 0,
+      totalRevenue: Math.round((result._sum.total ?? 0) * 100) / 100,
     };
   }
 
@@ -91,7 +91,9 @@ export class AnalyticsService {
       ...params,
     );
 
-    const revenueMap = new Map(rows.map((r) => [r.date, Number(r.revenue)]));
+    const revenueMap = new Map(
+      rows.map((r) => [r.date, Math.round(Number(r.revenue) * 100) / 100]),
+    );
 
     const result: { date: string; revenue: number }[] = [];
     const cursor = new Date(start);
@@ -135,7 +137,7 @@ export class AnalyticsService {
 
     return Object.entries(grouped).map(([month, revenue]) => ({
       month,
-      revenue,
+      revenue: Math.round(revenue * 100) / 100,
     }));
   }
 }
