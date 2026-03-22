@@ -106,6 +106,17 @@ src/
 
 ---
 
+## Demo Credentials
+
+After seeding, the following accounts are available:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@stockpilot.com` | `password123` |
+| Staff | `staff@stockpilot.com` | `password123` |
+
+---
+
 ## Getting Started
 
 ### Prerequisites
