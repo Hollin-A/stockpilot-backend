@@ -91,9 +91,7 @@ export class AnalyticsService {
       ...params,
     );
 
-    const revenueMap = new Map(
-      rows.map((r) => [r.date, Number(r.revenue)]),
-    );
+    const revenueMap = new Map(rows.map((r) => [r.date, Number(r.revenue)]));
 
     const result: { date: string; revenue: number }[] = [];
     const cursor = new Date(start);
@@ -108,5 +106,36 @@ export class AnalyticsService {
     }
 
     return result;
+  }
+
+  async getMonthlyRevenue() {
+    const orders = await this.prisma.order.findMany({
+      select: {
+        total: true,
+        createdAt: true,
+      },
+    });
+
+    const grouped: Record<string, number> = {};
+
+    for (const order of orders) {
+      const date = new Date(order.createdAt);
+
+      const monthKey = date.toLocaleString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      });
+
+      if (!grouped[monthKey]) {
+        grouped[monthKey] = 0;
+      }
+
+      grouped[monthKey] += order.total;
+    }
+
+    return Object.entries(grouped).map(([month, revenue]) => ({
+      month,
+      revenue,
+    }));
   }
 }

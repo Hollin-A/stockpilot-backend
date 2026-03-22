@@ -32,4 +32,9 @@ export class AnalyticsController {
   ) {
     return this.analyticsService.getSalesOverTime(startDate, endDate);
   }
+
+  @Get('monthly-revenue')
+  getMonthlyRevenue() {
+    return this.analyticsService.getMonthlyRevenue();
+  }
 }
